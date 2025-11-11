@@ -3,15 +3,17 @@ const fs = require("fs");
 const { exec } = require("child_process");
 let router = express.Router();
 const pino = require("pino");
-const {
-  default: makeWASocket,
-  useMultiFileAuthState,
-  delay,
-  makeCacheableSignalKeyStore,
-  Browsers,
-  jidNormalizedUser,
-} = require("@whiskeysockets/baileys");
-const { upload } = require("./mega");
+const { default: makeWASocket, useSingleFileAuthState } = require('@whiskeysockets/baileys');
+const { Boom } = require('@hapi/boom');
+const { join } = require('path');
+
+const { state, saveState } = useSingleFileAuthState(join(__dirname, 'auth.json'));
+
+async function startSock() {
+  const sock = makeWASocket({
+    auth: state,
+    printQRInTerminal: true
+  });
 
 function removeFile(FilePath) {
   if (!fs.existsSync(FilePath)) return false;
@@ -129,6 +131,7 @@ process.on("uncaughtException", function (err) {
 });
 
 module.exports = router;
+
 
 
 
